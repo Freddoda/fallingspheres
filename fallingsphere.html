@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>falling sphere</title>
+
+  <script>
+    function balldrop(){
+        let steps = 5000;
+        let sphereDiam = document.getElementById("diameter").value;
+        if (sphereDiam<=0){
+            document.getElementById("result").textContent="invalid diameter";
+            return;
+        }
+        let sphereDens = document.getElementById("density").value;
+        if (sphereDens<=0){
+            document.getElementById("result").textContent="invalid density";
+            return;
+        }
+        let distToFall = document.getElementById("distance").value;
+        if (distToFall<=0){
+            document.getElementById("result").textContent="invalid distance";
+            return;
+        }
+
+        let sphereA = ((sphereDiam/2)**2)*3.14159265359;
+        let sphereV = ((sphereDiam/2)**3)*3.14159265359*4/3;
+        let sphereM = sphereV*sphereDens;
+
+        let gravity = 9.8183; //m/s^2
+        let airDen = 1.204; //kg/m^3
+        let airViscos = 0.00001849; //kg/(m*s)
+
+        let distance = 0; //m fallen
+        let velocity = 0; //m/s
+        let curStep = 0;
+        let airRes; //m/s^2
+        let bouyForce; //m/s^2
+        let ReyN; //dimensionless
+        let dragC; //dimensionless
+
+        while (-distToFall<distance && distance<distToFall){
+            curStep+=1;
+            
+            if (Math.abs(velocity)>0.000001){
+                ReyN = (airDen*sphereDiam*Math.abs(velocity))/airViscos;
+                dragC = 24/ReyN+(2.6*ReyN/5)/(1+(ReyN/5)**1.52)+(0.411*(ReyN/263000)**(-7.94))/(1+(ReyN/263000)**(-8))+(0.25*ReyN/1000000)/(1+ReyN/1000000);
+                airRes =(((velocity**2)*airDen*dragC*sphereA)/(sphereM*2))*velocity/Math.abs(velocity);
+                velocity-=airRes/steps;
+            }
+            
+            bouyForce = (airDen*sphereV*gravity)/sphereM;
+            velocity-=bouyForce/steps;
+
+            velocity+=gravity/steps;
+
+            distance+=velocity/steps;
+        }
+        document.getElementById("result").textContent=`${distance} metres in ${curStep/steps} seconds`;
+    }
+  </script>
+</head>
+<body bgcolor="white">
+<style>
+    body { margin: 0; }
+</style>
+<div style="display: grid; place-items: center; height: 100dvh; background-color: black;" id="wrapper">
+    <div style="display: grid; place-items: center;background-color: white; width: 500px" id="main">
+        <h1>Drop Calculator</h1>
+        <label for="diameter">diameter in metres:</label>
+        <input type="number" id="diameter" name="diameter" placeholder="0">
+        <label for="density">density kg/m^3:</label>
+        <input type="number" id="density" name="density" placeholder="0">
+        <label for="distance">distance in metres:</label>
+        <input type="number" id="distance" name="distance" placeholder="0">
+        <br>
+        <button type="button" onclick="balldrop()" id = "button">calculate</button>
+        <p id="result">input some values</p>
+    </div>
+</div>
+</body>
+</html>
